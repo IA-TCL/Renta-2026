@@ -214,9 +214,280 @@ function initCountUp() {
     els.forEach(el => obs.observe(el));
 }
 
+/* ── Wizard: ¿Debo declarar? ────────────────────────── */
+const OBLIGACIONES = [
+    {
+        nombre: 'patrimonio bruto',
+        tope: 224095500, uvt: '4.500 UVT',
+        icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+        pregunta: '¿Cuánto valía tu patrimonio al 31 de diciembre de 2025?',
+        ayuda: 'Inmuebles, vehículos, cuentas bancarias, inversiones y demás activos.',
+    },
+    {
+        nombre: 'ingresos brutos',
+        tope: 69718600, uvt: '1.400 UVT',
+        icon: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+        pregunta: '¿Cuánto recibiste en total durante 2025?',
+        ayuda: 'Salario, honorarios, arriendos, dividendos u otras fuentes de ingreso.',
+    },
+    {
+        nombre: 'consumos con tarjeta de crédito',
+        tope: 69718600, uvt: '1.400 UVT',
+        icon: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
+        pregunta: '¿Cuánto consumiste con tarjetas de crédito en 2025?',
+        ayuda: 'Total acumulado en todas las tarjetas a tu nombre, sin importar la entidad.',
+    },
+    {
+        nombre: 'compras y consumos totales',
+        tope: 69718600, uvt: '1.400 UVT',
+        icon: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
+        pregunta: '¿Cuánto sumaron todas tus compras y consumos en 2025?',
+        ayuda: 'Con cualquier medio de pago: efectivo, débito, transferencia o crédito.',
+    },
+    {
+        nombre: 'consignaciones bancarias e inversiones',
+        tope: 69718600, uvt: '1.400 UVT',
+        icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+        pregunta: '¿Cuánto sumaron tus consignaciones e inversiones en 2025?',
+        ayuda: 'Depósitos y abonos en cuentas bancarias o instrumentos financieros.',
+    },
+];
+
+function fmtCOP(n) { return '$' + Number(n).toLocaleString('es-CO'); }
+
+function initWizard() {
+    const wiz = document.getElementById('wizard');
+    if (!wiz) return;
+    const mode    = wiz.dataset.mode || 'exact';
+    const body    = wiz.querySelector('#wiz-body');
+    const fill    = wiz.querySelector('#wiz-progress');
+    const counter = wiz.querySelector('#wiz-count');
+    const total   = OBLIGACIONES.length;
+    let current = 0;
+    let dir = 1;
+    const resp = new Array(total).fill(null);
+
+    function updateProgress(step) {
+        if (fill)    fill.style.width = (step / total) * 100 + '%';
+        if (counter) counter.textContent = step >= total ? 'Resultado' : `Paso ${step + 1} de ${total}`;
+    }
+
+    function exceeded(i) {
+        const r = resp[i], o = OBLIGACIONES[i];
+        if (mode === 'exact') return typeof r === 'number' && r > o.tope;
+        if (mode === 'yesno') return r === true;
+        if (mode === 'range') return !!(r && r.exceeds);
+        return false;
+    }
+
+    function answered() {
+        return resp[current] !== null && resp[current] !== '';
+    }
+
+    function dotsHTML() {
+        return '<div class="wiz-dots">' + OBLIGACIONES.map((o, i) => {
+            let cls = '';
+            if (i < current)        cls = exceeded(i) ? 'is-yes' : 'is-no';
+            else if (i === current) cls = 'is-current';
+            return `<span class="wiz-dot ${cls}"></span>`;
+        }).join('') + '</div>';
+    }
+
+    function renderStep() {
+        updateProgress(current);
+        const o = OBLIGACIONES[current];
+        let controls = '';
+
+        if (mode === 'exact') {
+            const v = resp[current] != null ? Number(resp[current]).toLocaleString('es-CO') : '';
+            controls = `
+                <div class="wiz-input-wrap">
+                    <span class="wiz-input-prefix">$</span>
+                    <input type="text" inputmode="numeric" class="wiz-input" id="wiz-field" placeholder="0" value="${v}" autocomplete="off">
+                </div>
+                <div class="wiz-gauge" id="wiz-gauge">
+                    <div class="wiz-gauge-track">
+                        <div class="wiz-gauge-fill" id="wiz-gauge-fill"></div>
+                        <div class="wiz-gauge-mark" title="Tope"></div>
+                    </div>
+                    <div class="wiz-gauge-foot">
+                        <span class="wiz-gauge-tope">Tope: <strong>${fmtCOP(o.tope)}</strong></span>
+                        <span class="wiz-gauge-status" id="wiz-gauge-status">Escribe un valor</span>
+                    </div>
+                </div>`;
+        } else if (mode === 'yesno') {
+            controls = `
+                <div class="wiz-tope-card">
+                    <span class="wiz-tope-card-label">Tope para declarar</span>
+                    <span class="wiz-tope-card-amount">${fmtCOP(o.tope)}</span>
+                    <span class="wiz-tope-card-uvt">${o.uvt}</span>
+                </div>
+                <div class="wiz-opts wiz-opts--2">
+                    <button type="button" class="wiz-opt wiz-opt--si ${resp[current]===true?'sel':''}" data-val="si">
+                        <span class="wiz-opt-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+                        <span class="wiz-opt-text">Sí, lo superé</span>
+                    </button>
+                    <button type="button" class="wiz-opt wiz-opt--no ${resp[current]===false?'sel':''}" data-val="no">
+                        <span class="wiz-opt-ic"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>
+                        <span class="wiz-opt-text">No, fue menor</span>
+                    </button>
+                </div>`;
+        } else {
+            const t = o.tope;
+            const brackets = [
+                { label: `Menos de ${fmtCOP(t)}`,                  exceeds: false },
+                { label: `Entre ${fmtCOP(t)} y ${fmtCOP(t * 2)}`,  exceeds: true  },
+                { label: `Más de ${fmtCOP(t * 2)}`,                exceeds: true  },
+            ];
+            controls = `<div class="wiz-tope-q">Tope para declarar: <strong>${fmtCOP(t)}</strong> · ${o.uvt}</div>
+                <div class="wiz-opts">` + brackets.map((b, bi) =>
+                `<button type="button" class="wiz-opt wiz-opt--range ${resp[current]&&resp[current].i===bi?'sel':''}" data-i="${bi}" data-exceeds="${b.exceeds}">${b.label}</button>`
+            ).join('') + '</div>';
+        }
+
+        body.innerHTML = `
+            <div class="wiz-step ${dir > 0 ? 'wiz-in-right' : 'wiz-in-left'}">
+                ${dotsHTML()}
+                <div class="wiz-step-icon"><svg viewBox="0 0 24 24">${o.icon}</svg></div>
+                <p class="wiz-question">${o.pregunta}</p>
+                <p class="wiz-help">${o.ayuda}</p>
+                ${controls}
+                <div class="wiz-nav">
+                    <button type="button" class="wiz-back" id="wiz-back" ${current===0?'disabled':''}>
+                        <span class="wiz-back-ic"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></span>
+                        Volver atrás
+                    </button>
+                    ${mode === 'exact' ? `<button type="button" class="wiz-next" id="wiz-next">
+                        ${current===total-1?'Ver resultado':'Siguiente'}
+                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>` : ''}
+                </div>
+            </div>`;
+
+        const goNext = () => {
+            if (!answered()) { wiz.classList.add('wiz-shake'); setTimeout(() => wiz.classList.remove('wiz-shake'), 400); return; }
+            dir = 1;
+            if (current === total - 1) renderResult();
+            else { current++; renderStep(); }
+        };
+
+        if (mode === 'exact') {
+            const field  = body.querySelector('#wiz-field');
+            const fillEl = body.querySelector('#wiz-gauge-fill');
+            const statEl = body.querySelector('#wiz-gauge-status');
+            const gauge  = body.querySelector('#wiz-gauge');
+            const paintGauge = () => {
+                const n = resp[current];
+                if (typeof n !== 'number') { fillEl.style.width = '0%'; gauge.className = 'wiz-gauge'; statEl.textContent = 'Escribe un valor'; return; }
+                const pct = Math.min(n / (o.tope * 2) * 100, 100);
+                fillEl.style.width = pct + '%';
+                if (n > o.tope) { gauge.className = 'wiz-gauge is-over';  statEl.textContent = 'Supera el tope'; }
+                else            { gauge.className = 'wiz-gauge is-under'; statEl.textContent = 'Por debajo del tope'; }
+            };
+            field.focus();
+            field.addEventListener('input', () => {
+                const num = parseInt(field.value.replace(/\D/g, ''), 10);
+                resp[current] = isNaN(num) ? null : num;
+                field.value = isNaN(num) ? '' : num.toLocaleString('es-CO');
+                paintGauge();
+                toggleNext();
+            });
+            field.addEventListener('keydown', e => { if (e.key === 'Enter') goNext(); });
+            paintGauge();
+        } else {
+            body.querySelectorAll('.wiz-opt').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    resp[current] = (mode === 'yesno')
+                        ? btn.dataset.val === 'si'
+                        : { i: +btn.dataset.i, exceeds: btn.dataset.exceeds === 'true' };
+                    body.querySelectorAll('.wiz-opt').forEach(b => b.classList.remove('sel'));
+                    btn.classList.add('sel');
+                    toggleNext();
+                    setTimeout(goNext, 320);
+                });
+            });
+        }
+
+        body.querySelector('#wiz-back').addEventListener('click', () => { if (current > 0) { dir = -1; current--; renderStep(); } });
+        const nextBtn = body.querySelector('#wiz-next');
+        if (nextBtn) nextBtn.addEventListener('click', goNext);
+        toggleNext();
+    }
+
+    function toggleNext() {
+        const next = body.querySelector('#wiz-next');
+        if (next) next.classList.toggle('is-disabled', !answered());
+    }
+
+    function renderResult() {
+        updateProgress(total);
+        const lista = OBLIGACIONES.map((o, i) => ({ o, i })).filter(({ i }) => exceeded(i));
+        const debe = lista.length > 0;
+
+        let detalle;
+        if (debe) {
+            detalle = '<ul class="wiz-reasons">' + lista.map(({ o, i }) => {
+                const monto = mode === 'exact' ? `<span class="wiz-reason-monto" data-to="${resp[i]}">$0</span>` : '';
+                return `<li>
+                    <span class="wiz-reason-ic"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
+                    <div class="wiz-reason-body">
+                        <span class="wiz-reason-name">${o.nombre.charAt(0).toUpperCase() + o.nombre.slice(1)}</span>
+                        <span class="wiz-reason-meta">Tope: ${fmtCOP(o.tope)} · ${o.uvt}</span>
+                    </div>
+                    ${monto}
+                </li>`;
+            }).join('') + '</ul>';
+        } else {
+            detalle = '';
+        }
+
+        body.innerHTML = `
+            <div class="wiz-result ${debe ? 'is-debe' : 'is-nodebe'}">
+                <div class="wiz-result-badge">
+                    <span class="wiz-result-ring"></span>
+                    <svg viewBox="0 0 24 24">${debe
+                        ? '<path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'
+                        : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>'}</svg>
+                </div>
+                <h3 class="wiz-result-title">${debe ? 'Sí, debes declarar renta' : 'No estás obligado a declarar'}</h3>
+                <p class="wiz-result-sub">${debe
+                    ? `Cumples <strong><span class="wiz-cup" data-to="${lista.length}">0</span> de 5</strong> condiciones que la DIAN exige para declarar el año gravable 2025.`
+                    : 'Aun así, declarar puede beneficiarte: podrías recuperar retenciones que te practicaron durante el año.'}</p>
+                ${detalle}
+                <button type="button" class="wiz-restart" id="wiz-restart">
+                    <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Volver a empezar
+                </button>
+            </div>`;
+        body.querySelectorAll('.wiz-reason-monto').forEach(el => {
+            const to = +el.dataset.to, t0 = performance.now(), durMs = 900;
+            (function tick(now) {
+                const p = Math.min((now - t0) / durMs, 1);
+                const ease = 1 - Math.pow(1 - p, 3);
+                el.textContent = fmtCOP(Math.round(ease * to));
+                if (p < 1) requestAnimationFrame(tick);
+            })(t0);
+        });
+
+        body.querySelectorAll('.wiz-cup').forEach(el => {
+            const to = +el.dataset.to, t0 = performance.now(), durMs = 700;
+            (function tick(now) {
+                const p = Math.min((now - t0) / durMs, 1);
+                el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * to);
+                if (p < 1) requestAnimationFrame(tick);
+            })(t0);
+        });
+
+        body.querySelector('#wiz-restart').addEventListener('click', () => { dir = -1; current = 0; resp.fill(null); renderStep(); });
+    }
+
+    renderStep();
+}
+
 /* ── Init ───────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
     initCalculadora();
+    initWizard();
     initDrawer();
     initBackToTop();
     initScrollAnimations();

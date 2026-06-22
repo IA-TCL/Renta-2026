@@ -22,7 +22,7 @@
 <header class="header">
     <div class="header-inner">
         <a href="https://tclasesores.com" class="logo">
-            <img src="../PQRS/Imagenes/logo.png" alt="TCL Asesores">
+            <img src="imagenes/logo.png" alt="TCL Asesores">
         </a>
         <nav>
             <ul>
@@ -77,17 +77,6 @@
 
             <ul class="limit-list">
                 <li class="limit-item fade-up">
-                    <span class="limit-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-                    <div class="limit-text">
-                        <div class="limit-name">Ingresos brutos</div>
-                        <div class="limit-desc">Suma de todo lo que recibiste en 2025: salario, honorarios, arriendos, dividendos u otras fuentes de ingreso.</div>
-                    </div>
-                    <div class="limit-value">
-                        <div class="limit-amount">$69.718.600</div>
-                        <div class="limit-uvt">1.400 UVT</div>
-                    </div>
-                </li>
-                <li class="limit-item fade-up">
                     <span class="limit-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
                     <div class="limit-text">
                         <div class="limit-name">Patrimonio bruto al 31 de diciembre</div>
@@ -96,6 +85,17 @@
                     <div class="limit-value">
                         <div class="limit-amount">$224.095.500</div>
                         <div class="limit-uvt">4.500 UVT</div>
+                    </div>
+                </li>
+                <li class="limit-item fade-up">
+                    <span class="limit-icon"><svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                    <div class="limit-text">
+                        <div class="limit-name">Ingresos brutos</div>
+                        <div class="limit-desc">Suma de todo lo que recibiste en 2025: salario, honorarios, arriendos, dividendos u otras fuentes de ingreso.</div>
+                    </div>
+                    <div class="limit-value">
+                        <div class="limit-amount">$69.718.600</div>
+                        <div class="limit-uvt">1.400 UVT</div>
                     </div>
                 </li>
                 <li class="limit-item fade-up">
@@ -142,12 +142,17 @@
         <div class="calc-sticky">
             <div class="calc-card fade-up">
                 <div class="calc-head">
-                    <span class="calc-head-badge">
-                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                        Año gravable 2025
-                    </span>
-                    <p class="calc-head-title">¿Cuándo debo declarar?</p>
-                    <p class="calc-head-sub">Ingresa los últimos 2 dígitos de tu NIT</p>
+                    <div class="calc-head-content">
+                        <span class="calc-head-badge">
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                            Año gravable 2025
+                        </span>
+                        <p class="calc-head-title">¿Cuándo debo declarar?</p>
+                        <p class="calc-head-sub">Ingresa los últimos 2 dígitos de tu NIT</p>
+                    </div>
+                    <div class="calc-head-logo-card">
+                        <img src="imagenes/logo.png" alt="TCL Asesores" class="calc-head-logo">
+                    </div>
                 </div>
                 <div class="calc-body">
                     <span class="calc-field-label">
@@ -190,6 +195,28 @@
                     </div>
                     <div id="calc-error" class="calc-error">Ingresa exactamente dos dígitos (00 – 99).</div>
                 </div>
+            </div>
+
+            <!-- WIZARD: ¿Debo declarar? -->
+            <div class="wizard-card fade-up" id="wizard" data-mode="yesno">
+                <div class="wizard-head">
+                    <div class="wizard-head-row">
+                        <div class="wizard-head-content">
+                            <span class="wizard-badge">
+                                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                Diagnóstico en 5 pasos
+                            </span>
+                            <p class="wizard-title">¿Estás obligado a declarar?</p>
+                            <p class="wizard-sub">Responde 5 preguntas y descúbrelo al instante</p>
+                        </div>
+                        <div class="calc-head-logo-card">
+                            <img src="imagenes/logo.png" alt="TCL Asesores" class="calc-head-logo">
+                        </div>
+                    </div>
+                    <div class="wizard-progress"><div class="wizard-progress-fill" id="wiz-progress"></div></div>
+                    <span class="wizard-step-count" id="wiz-count">Paso 1 de 5</span>
+                </div>
+                <div class="wizard-body" id="wiz-body"></div>
             </div>
         </div>
 
@@ -251,7 +278,7 @@
     <div class="footer-inner">
         <div class="footer-grid">
             <div class="footer-col">
-                <img src="../PQRS/Imagenes/logo.png" alt="TCL Asesores" class="footer-logo-img">
+                <img src="imagenes/logo.png" alt="TCL Asesores" class="footer-logo-img">
                 <p class="footer-desc">Acompañamos a las empresas más allá del cumplimiento, integrando conocimiento, criterio y compromiso para dar orden, claridad y estabilidad a cada decisión.</p>
                 <div class="footer-social-row">
                     <a href="https://facebook.com/tclasesores" target="_blank" rel="noopener" class="footer-social-btn" aria-label="Facebook">
@@ -303,7 +330,7 @@
 <div class="drawer-overlay" id="drawer-overlay"></div>
 <div class="drawer" id="drawer">
     <div class="drawer-head">
-        <img src="../PQRS/Imagenes/logo.png" alt="TCL Asesores" class="drawer-logo">
+        <img src="imagenes/logo.png" alt="TCL Asesores" class="drawer-logo">
         <button class="drawer-close" id="drawer-close" aria-label="Cerrar">
             <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
