@@ -221,20 +221,23 @@ const OBLIGACIONES = [
         tope: 224095500, uvt: '4.500 UVT',
         icon: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
         pregunta: '¿Cuánto valía tu patrimonio al 31 de diciembre de 2025?',
-        ayuda: 'Inmuebles, vehículos, cuentas bancarias, inversiones y demás activos.',
+        preguntaSiNo: '¿Tu patrimonio bruto al cierre de 2025 superó este tope?',
+        ayuda: 'Suma de inmuebles, vehículos, cuentas bancarias, inversiones y demás activos a tu nombre.',
     },
     {
         nombre: 'ingresos brutos',
         tope: 69718600, uvt: '1.400 UVT',
         icon: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
         pregunta: '¿Cuánto recibiste en total durante 2025?',
-        ayuda: 'Salario, honorarios, arriendos, dividendos u otras fuentes de ingreso.',
+        preguntaSiNo: '¿Tus ingresos brutos al cierre de 2025 superaron este tope?',
+        ayuda: 'Todo lo que recibiste: salario, honorarios, arriendos, dividendos u otras fuentes.',
     },
     {
         nombre: 'consumos con tarjeta de crédito',
         tope: 69718600, uvt: '1.400 UVT',
         icon: '<rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/>',
         pregunta: '¿Cuánto consumiste con tarjetas de crédito en 2025?',
+        preguntaSiNo: '¿Tus consumos con tarjeta de crédito al cierre de 2025 superaron este tope?',
         ayuda: 'Total acumulado en todas las tarjetas a tu nombre, sin importar la entidad.',
     },
     {
@@ -242,6 +245,7 @@ const OBLIGACIONES = [
         tope: 69718600, uvt: '1.400 UVT',
         icon: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>',
         pregunta: '¿Cuánto sumaron todas tus compras y consumos en 2025?',
+        preguntaSiNo: '¿Tus compras y consumos al cierre de 2025 superaron este tope?',
         ayuda: 'Con cualquier medio de pago: efectivo, débito, transferencia o crédito.',
     },
     {
@@ -249,7 +253,8 @@ const OBLIGACIONES = [
         tope: 69718600, uvt: '1.400 UVT',
         icon: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
         pregunta: '¿Cuánto sumaron tus consignaciones e inversiones en 2025?',
-        ayuda: 'Depósitos y abonos en cuentas bancarias o instrumentos financieros.',
+        preguntaSiNo: '¿Tus consignaciones e inversiones al cierre de 2025 superaron este tope?',
+        ayuda: 'Depósitos y abonos hechos en tus cuentas bancarias o instrumentos financieros.',
     },
 ];
 
@@ -345,11 +350,12 @@ function initWizard() {
             ).join('') + '</div>';
         }
 
+        const pregunta = (mode === 'exact') ? o.pregunta : (o.preguntaSiNo || o.pregunta);
         body.innerHTML = `
             <div class="wiz-step ${dir > 0 ? 'wiz-in-right' : 'wiz-in-left'}">
                 ${dotsHTML()}
                 <div class="wiz-step-icon"><svg viewBox="0 0 24 24">${o.icon}</svg></div>
-                <p class="wiz-question">${o.pregunta}</p>
+                <p class="wiz-question">${pregunta}</p>
                 <p class="wiz-help">${o.ayuda}</p>
                 ${controls}
                 <div class="wiz-nav">
