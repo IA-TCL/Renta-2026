@@ -976,3 +976,16 @@ nav ul li a.active { color: var(--primary); font-weight: 600; }
 .wiz-restart svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
 .wiz-restart:hover { background: #e6ebe8; color: var(--primary); }
 .wiz-restart:hover svg { transform: rotate(-180deg); }
+
+/* ── Wizard responsive (móvil) — al final para ganar a las reglas de escritorio ── */
+@media (max-width: 600px) {
+    .wizard-head { padding: 16px 18px 14px; }
+    .wizard-head-row { gap: 12px; align-items: flex-start; }
+    .wizard-title { font-size: 19px; }
+    .wizard-sub { font-size: 12.5px; margin-bottom: 12px; }
+    /* Logo: sin el desplazamiento de escritorio, más chico y pegado a la derecha sin tapar el título */
+    .wizard-head-row .calc-head-logo-card { margin-right: 0; transform: none; align-self: flex-start; padding: 10px 12px; border-radius: 12px; }
+    .wizard-head-row .calc-head-logo-card:hover { transform: translateY(-3px) scale(1.04); }
+    .wizard-head-row .calc-head-logo { height: 30px; }
+    .wizard-body { padding: 16px 18px 18px; }
+}
