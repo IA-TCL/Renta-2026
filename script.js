@@ -177,15 +177,27 @@ function initBackToTop() {
 
 /* ── Scroll animations ──────────────────────────────── */
 function initScrollAnimations() {
-    const obs = new IntersectionObserver(entries => {
-        entries.forEach((e, i) => {
-            if (e.isIntersecting) {
-                setTimeout(() => e.target.classList.add('visible'), i * 80);
-                obs.unobserve(e.target);
-            }
-        });
-    }, { threshold: 0.12 });
-    document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+    const els = document.querySelectorAll('.fade-up');
+    const revealAll = () => els.forEach(el => el.classList.add('visible'));
+
+    // Sin soporte de IntersectionObserver (WebViews viejos) → mostrar todo
+    if (!('IntersectionObserver' in window)) { revealAll(); return; }
+
+    try {
+        const obs = new IntersectionObserver((entries, observer) => {
+            entries.forEach((e, i) => {
+                if (e.isIntersecting) {
+                    setTimeout(() => e.target.classList.add('visible'), i * 80);
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12 });
+        els.forEach(el => obs.observe(el));
+    } catch (_) { revealAll(); return; }
+
+    // Fallback: si el observer no dispara (navegador interno de WhatsApp),
+    // revela todo de todos modos tras 1s.
+    setTimeout(revealAll, 1000);
 }
 
 /* ── Count-up ───────────────────────────────────────── */

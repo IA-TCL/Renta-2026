@@ -518,8 +518,11 @@ nav ul li a.active { color: var(--primary); font-weight: 600; }
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.fade-up { opacity: 0; transform: translateY(28px); transition: opacity .55s ease, transform .55s ease; }
-.fade-up.visible { opacity: 1; transform: none; }
+.fade-up { opacity: 0; transform: translateY(28px); transition: opacity .55s ease, transform .55s ease; animation: fadeUpSafety .5s ease 1.4s forwards; }
+.fade-up.visible { opacity: 1; transform: none; animation: none; }
+/* Red de seguridad: si el observer no dispara (WebView de WhatsApp, etc.),
+   el contenido se revela igual tras 1.4s sin depender de JavaScript */
+@keyframes fadeUpSafety { to { opacity: 1; transform: none; } }
 
 /* ── Responsive ────────────────────────────────────── */
 @media (max-width: 1100px) {
